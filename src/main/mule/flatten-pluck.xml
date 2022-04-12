@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="bb8ce9fe-c586-40e9-892b-6909daca7333" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="flatten-pluckFlow" doc:id="aa037f7e-ac2f-4c63-bd02-ff30b23dd923" >
+		<http:listener doc:name="Listener" doc:id="22e43a0b-b576-47fb-99fb-df3f7c206c8d" path="/flatten-pluck" config-ref="HTTP_Listener_config"/>
+		<ee:transform doc:name="Transform Message" doc:id="b0545d3a-0385-4e80-a6ec-4b6aa907c6a9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+var empExp = [1,2,3,4,[3,24,67,21,77,21],45,[54,23,90,37]]
+var employeeList =[
+	{
+	empName: "Makala",
+	empLocation: "India",
+	empExperience:"11",
+	isActive:"true"
+},{
+	empName: "Hemanth",
+	empLocation: "India",
+	empExperience:"13",
+	isActive:"false"
+},[
+	{
+	empName: "Makala",
+	empLocation: "India",
+	empExperience:"11",
+	isActive:"true"
+},{
+	empName: "Hemanth",
+	empLocation: "India",
+	empExperience:"13",
+	isActive:"false"
+}
+]
+]
+
+var empRed = {
+	subEmp:[{
+		"test1":1,
+		"test2":2
+		
+	},{
+		"test1":3,
+		"test2":4
+		
+	}]
+}
+
+var subEmployee = {
+	empName: "Makala",
+	empLocation: "India",
+	empExperience:"12",
+	isActive:"true"
+}
+var emp = " "
+var sum = 0
+
+var prob = [
+    {
+        "param_Name": "first",
+        "param_Value": "second"
+    },{
+        "param_Name": "third",
+        "param_Value": "fourth"
+    }
+]
+
+
+fun plk(test) = {
+	test1: test pluck($)
+}
+---
+{
+	"flatten" : flatten(empExp),
+	"empFlatren": flatten(employeeList),
+	"subEmpPluck": plk(subEmployee).test1 joinBy  " ",
+	"reduce": flatten(empExp) reduce ($$+$),
+	"reduce2": empRed.subEmp.test2 reduce ((item, accumulator) -> accumulator * item),
+	"map_reduce": prob map ((item, index) -> {
+    (item.param_Name): item.param_Value,
+}) reduce ($$++$)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
